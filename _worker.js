@@ -4,6 +4,9 @@
  * static files (404.html, sw.js, conf.js)
  */
 const ASSET_URL = 'https://hunshcn.github.io/gh-proxy/'
+
+const CHANNEL_LIST = 'https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/global.m3u'
+
 // 前缀，如果自定义路由为example.com/gh/*，将PREFIX改为 '/gh/'，注意，少一个杠都会错！
 const PREFIX = '/'
 // 分支文件使用jsDelivr镜像的开关，0为关闭，默认关闭
@@ -30,6 +33,9 @@ const exp3 = /^(?:https?:\/\/)?github\.com\/.+?\/.+?\/(?:info|git-).*$/i
 const exp4 = /^(?:https?:\/\/)?raw\.(?:githubusercontent|github)\.com\/.+?\/.+?\/.+?\/.+$/i
 const exp5 = /^(?:https?:\/\/)?gist\.(?:githubusercontent|github)\.com\/.+?\/.+?\/.+$/i
 const exp6 = /^(?:https?:\/\/)?github\.com\/.+?\/.+?\/tags.*$/i
+
+const exp10 = /^global\.m3u$/
+
 
 /**
  * @param {any} body
@@ -62,7 +68,7 @@ addEventListener('fetch', e => {
 
 
 function checkUrl(u) {
-    for (let i of [exp1, exp2, exp3, exp4, exp5, exp6]) {
+    for (let i of [exp1, exp2, exp3, exp4, exp5, exp6, exp10]) {
         if (u.search(i) === 0) {
             return true
         }
@@ -96,6 +102,8 @@ async function fetchHandler(e) {
     } else if (path.search(exp4) === 0) {
         const newUrl = path.replace(/(?<=com\/.+?\/.+?)\/(.+?\/)/, '@$1').replace(/^(?:https?:\/\/)?raw\.(?:githubusercontent|github)\.com/, 'https://cdn.jsdelivr.net/gh')
         return Response.redirect(newUrl, 302)
+    } else if (path.search(exp10) === 0) {
+        return fetch(CHANNEL_LIST)
     } else {
         return fetch(ASSET_URL + path)
     }
